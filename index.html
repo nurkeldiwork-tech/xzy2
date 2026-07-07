@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xzy — память для AI-кодинга</title>
+    <meta name="description"
+        content="Xzy запоминает архитектурные решения вашей команды и не даёт AI-ассистенту повторять старые ошибки. Плагин для Cursor и Claude Code.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="background-glow"></div>
+
+    <div class="app-layout">
+        <aside class="logo-sidebar">XZY</aside>
+
+        <main class="container">
+            <!-- Главный экран -->
+            <header class="hero">
+                <h1 class="headline">Сколько раз вы уже обсуждали одно и то же?</h1>
+                <p class="subheadline">Xzy запоминает архитектурные решения команды и предупреждает AI-ассистента, когда
+                    новый запрос им противоречит.</p>
+                <div class="cta-container">
+                    <span class="note">Интеграция через MCP-сервер и Hooks в Claude Code и Cursor</span>
+                </div>
+            </header>
+
+            <!-- Пример: как это выглядит -->
+            <section class="section problem-section">
+                <h2 class="section-title">Как это выглядит в чате</h2>
+                <p class="section-desc">Когда вы просите модель добавить Redis, Xzy перехватывает намерение на уровне
+                    протокола MCP, находит прошлое решение (ADR-42) и показывает предупреждение:</p>
+                <div class="mockup">
+                    <div class="mockup-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="message user-message">
+                            <span class="prompt-icon">&gt;</span> Добавим Redis для хранения сессий пользователей.
+                        </div>
+                        <div class="message ai-message xzy-flag">
+                            <div class="flag-header">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                                    </path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <strong>Xzy Memory Flag</strong> (Приоритет: P2 / Архитектура)
+                            </div>
+                            <p>Запрос противоречит зафиксированному техническому решению <strong>(ADR-42)</strong>.</p>
+                            <div class="decision-context">
+                                <strong>Согласованное решение:</strong> Отказ от Redis для сессий (Март).<br>
+                                <strong>Обоснование:</strong> Увеличивал задержки (latency) на критическом пути. Переход
+                                на
+                                stateless JWT.<br>
+                                <strong>Критерий пересмотра (override_condition):</strong> Нагрузка превысит 5000 RPS и
+                                потребуется мгновенный отзыв токенов.
+                            </div>
+                            <p>Требуется подтверждение для обхода ограничения и фиксации технического долга.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Три агента и 5 шагов -->
+            <section class="section workflow-section">
+                <h2 class="section-title">Три уровня контроля на каждом запросе</h2>
+                <div class="workflow-grid">
+                    <div class="workflow-card">
+                        <div class="workflow-num">P1</div>
+                        <h3>Агент-Безопасник</h3>
+                        <p>Статический анализ кода (AST/regex). Ловит критические уязвимости (SQLi, eval, секреты в
+                            коде)
+                            без вызова LLM. Спорит жестко и требует явный override.</p>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-num">P2</div>
+                        <h3>Агент-Память</h3>
+                        <p>Быстрый фильтр по тегам технологий + семантический поиск в базе ADR. Находит архитектурные
+                            конфликты с прошлыми решениями вашей команды.</p>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-num">P3</div>
+                        <h3>Агент-Стилист</h3>
+                        <p>Проверяет код на соответствие гайдлайнам оформления. Молча предлагает автофикс (autofix) для
+                            мелких правок, не отвлекая разработчика.</p>
+                    </div>
+                </div>
+
+                <div class="steps-block">
+                    <h3>Как Xzy обрабатывает каждый запрос за 5 шагов:</h3>
+                    <ol class="steps-list">
+                        <li><strong>Захват:</strong> Система перехватывает промпт и определяет, содержит ли он
+                            архитектурные
+                            намерения.</li>
+                        <li><strong>Теговый фильтр:</strong> Дешевое сравнение по ключевым словам и технологиям для
+                            отсечения лишнего.</li>
+                        <li><strong>Семантический поиск:</strong> Поиск по смыслу среди top-5 похожих записей в базе
+                            архитектурных решений.</li>
+                        <li><strong>Анализ конфликта:</strong> LLM сравнивает намерение разработчика с найденным ADR и
+                            определяет тип пересечения.</li>
+                        <li><strong>Фиксация:</strong> Решение сохраняется. В случае обхода — записывается в базу как
+                            долг с
+                            меткой <code>OVERRIDDEN</code>.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Сравнение и Экономика -->
+            <section class="section comparison-section">
+                <h2 class="section-title">Экономика контекста: Xzy vs Notion / MD-файлы</h2>
+                <div class="comparison-grid">
+                    <div class="card passive-card">
+                        <div class="badge passive">Линейный рост затрат</div>
+                        <h3>Обычные файлы и Wiki</h3>
+                        <p>С ростом проекта документация разрастается. Чтобы модель не ошибалась, приходится скармливать
+                            ей все больше файлов. Контекст забивается, а стоимость запросов растет линейно.</p>
+                    </div>
+                    <div class="card active-card">
+                        <div class="badge active">Фиксированный контекст</div>
+                        <h3>Архитектурная память Xzy</h3>
+                        <p>В модель передаются только 5 самых релевантных решений, найденных семантическим поиском.
+                            Стоимость и скорость работы ассистента остаются стабильными даже на проектах с годами
+                            истории.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ограничения продукта -->
+            <section class="section limits-section">
+                <h2 class="section-title">Честные ограничения Xzy</h2>
+                <div class="limits-grid">
+                    <div class="limit-item">
+                        <h4>Не заменяет контекст сессии</h4>
+                        <p>Xzy не решает проблему потери нити разговора внутри одной сессии (это задача Cursor/Claude
+                            Code).
+                            Мы решаем проблему потери контекста <strong>между сессиями во времени</strong>.</p>
+                    </div>
+                    <div class="limit-item">
+                        <h4>Не для соло-разработчиков на один вечер</h4>
+                        <p>Если проект живет пару недель, Xzy не окупит себя. Инструмент раскрывает ценность в командах,
+                            где
+                            люди сменяются, решения забываются, а проект живет месяцами.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Модель подписки (Pricing / Business Model) -->
+            <section class="section pricing-section">
+                <div class="pricing-header">
+                    <span class="pricing-label">Бизнес-модель (В разработке)</span>
+                    <h2 class="section-title">Open Core: бесплатный старт, масштабирование по подписке</h2>
+                    <p class="pricing-subtitle"><strong>Обратите внимание:</strong> подписка сейчас находится в
+                        разработке.</p>
+                </div>
+
+                <div class="pricing-grid">
+                    <!-- Open Source -->
+                    <div class="pricing-card">
+                        <div class="pricing-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="16 18 22 12 16 6" />
+                                <polyline points="8 6 2 12 8 18" />
+                            </svg>
+                        </div>
+                        <h3>Open Source</h3>
+                        <p class="pricing-desc">MCP-сервер и хуки, которые подключаются напрямую в Cursor или Claude
+                            Code. Локальная база памяти на вашем ПК.</p>
+                        <div class="price">Бесплатно</div>
+                        <div class="price-note">Self-managed решение с открытым исходным кодом</div>
+                    </div>
+
+                    <!-- Cloud -->
+                    <div class="pricing-card featured">
+                        <span class="badge-featured">В разработке</span>
+                        <div class="pricing-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+                            </svg>
+                        </div>
+                        <h3>Cloud</h3>
+                        <p class="pricing-desc">Облачная синхронизация памяти для всей команды, умный анализ конфликтов
+                            в реальном времени, настройка в 1 клик.</p>
+                        <div class="price">Подписка за место</div>
+                        <div class="price-note">Запуск планируется скоро</div>
+                    </div>
+
+                    <!-- Enterprise -->
+                    <div class="pricing-card">
+                        <div class="pricing-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" />
+                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                                <line x1="12" y1="12" x2="12" y2="12.01" />
+                                <path d="M12 12v4" />
+                            </svg>
+                        </div>
+                        <h3>Enterprise</h3>
+                        <p class="pricing-desc">Развертывание в вашем приватном облаке или on-premise, SSO-авторизация,
+                            шифрование данных на уровне СУБД, общая память проекта.</p>
+                        <div class="price">В разработке</div>
+                        <div class="price-note">Для крупных компаний по запросу</div>
+                    </div>
+                </div>
+
+                <div class="pricing-footer">
+                    <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        Открытый слой интеграции — безопасность, которую можно проверить аудитом кода
+                    </span>
+                    <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        Ценность решения растет с размером команды, а не для соло-разработки
+                    </span>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer-bottom">
+                    <div class="footer-logo">Xzy</div>
+                    <p class="tagline">Память для AI-кодинга. Плагин для Cursor и Claude Code.</p>
+                    <div class="social-links">
+                        <a href="#" class="link">GitHub</a>
+                        <a href="#" class="link">Twitter/X</a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
